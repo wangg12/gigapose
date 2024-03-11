@@ -9,7 +9,7 @@ import numpy as np
 if __name__ == "__main__":
     gpose_err_dir = Path("/home/gu/Documents/2024/bop23_vis/gpose/gpose2023_ycbv-test_f1a3e861-761d-41ea-b585-e84f9fd40591/error=mssd_ntop=-1")
     genflow_err_dir = Path("/home/gu/Documents/2024/bop23_vis/genflow/genflow-multihypo16_ycbv-test_e77b7247-29c7-46bb-b468-11da990ca422/error=mssd_ntop=-1")
-    result_path = Path("/home/gu/Documents/2024/bop23_vis/ycbv_gpose_genflow_mmsd_scores.csv")
+    result_path = Path("/home/gu/Documents/2024/bop23_vis/ycbv_gpose_genflow_mssd_scores.csv")
 
     results = {}
 

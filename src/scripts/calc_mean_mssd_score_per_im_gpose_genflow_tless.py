@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     test_scenes = list(range(1, 21))
 
-    result_path = Path("/home/gu/Documents/2024/bop23_vis/tless_gpose_genflow_mmsd_scores_no_same_inst.csv")
+    result_path = Path("/home/gu/Documents/2024/bop23_vis/tless_gpose_genflow_mssd_scores_no_same_inst.csv")
 
     # stat how many same insts in each im
     test_targets_path = Path("/home/gu/Storage/BOP_DATASETS/tless/test_targets_bop19.json")

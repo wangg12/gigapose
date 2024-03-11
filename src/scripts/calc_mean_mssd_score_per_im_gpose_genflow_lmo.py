@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     test_scenes = [2]
 
-    result_path = Path("/home/gu/Documents/2024/bop23_vis/lmo_gpose_genflow_mmsd_scores.csv")
+    result_path = Path("/home/gu/Documents/2024/bop23_vis/lmo_gpose_genflow_mssd_scores.csv")
 
     # ------------------------------
     results = {}
