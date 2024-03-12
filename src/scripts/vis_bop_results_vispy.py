@@ -253,7 +253,7 @@ def compute_distances(
     gt_pose,
     pred_pose,
     symmetry_obj_ids,
-    max_distance=5,  # cm
+    max_distance=10,  # cm
     mm_to_cm=True,
 ):
     # distance = np.zeros(len(pts))
@@ -269,10 +269,12 @@ def compute_distances(
     distance_symmetry = spatial.distance_matrix(points_gt, points_pred, p=2).min(axis=1) * scale   # mm to cm
 
     obj_id = int(obj_label)
+    # print("distance: ", distance.min(), distance.max())
+    # print("distance sym: ", distance_symmetry.min(), distance_symmetry.max())
     if obj_id in symmetry_obj_ids or len(symmetry_obj_ids) == 0:
         distance = np.append(distance_symmetry, [0, max_distance])
     else:
-        distance = np.append(distance, [max_distance])
+        distance = np.append(distance, [0, max_distance])
     distance[distance > max_distance] = max_distance
     # distance /= max_distance
     colors = get_cmap(distance, "turbo")
@@ -339,7 +341,8 @@ if __name__ == "__main__":
 
     for dataset_name in ["ycbv"]:  # "lmo", "tudl",
         if dataset_name == "ycbv":
-            symmetry_obj_ids = [1, 13, 14, 16, 18, 19, 20, 21]
+            # symmetry_obj_ids = [1, 13, 14, 16, 18, 19, 20, 21]
+            symmetry_obj_ids = [13, 18, 19, 20]
         elif dataset_name == "lmo":
             symmetry_obj_ids = [10, 11]
         elif dataset_name == "tless":
