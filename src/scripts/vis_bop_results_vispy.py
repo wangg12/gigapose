@@ -253,22 +253,28 @@ def compute_distances(
     gt_pose,
     pred_pose,
     symmetry_obj_ids,
-    max_distance=10,
+    max_distance=5,  # cm
+    mm_to_cm=True,
 ):
     # distance = np.zeros(len(pts))
     # R @ p + t  -> p^T @ R^T + t^T
     points_gt = pts @ gt_pose[:3, :3].T + gt_pose[:3, 3].reshape(1, 3)
     points_pred = pts @ pred_pose[:3, :3].T + pred_pose[:3, 3].reshape(1, 3)
 
-    distance = np.linalg.norm(points_gt - points_pred, axis=1)
-    distance_symmetry = spatial.distance_matrix(points_gt, points_pred, p=2).min(axis=1)
+    if mm_to_cm:
+        scale = 0.1
+    else:
+        scale = 1
+    distance = np.linalg.norm(points_gt - points_pred, axis=1) * scale   # mm to cm
+    distance_symmetry = spatial.distance_matrix(points_gt, points_pred, p=2).min(axis=1) * scale   # mm to cm
 
     obj_id = int(obj_label)
     if obj_id in symmetry_obj_ids or len(symmetry_obj_ids) == 0:
         distance = np.append(distance_symmetry, [0, max_distance])
     else:
         distance = np.append(distance, [max_distance])
-    distance /= max_distance
+    distance[distance > max_distance] = max_distance
+    # distance /= max_distance
     colors = get_cmap(distance, "turbo")
     return distance[:len(pts)], colors[:len(pts)]
 
@@ -333,9 +339,11 @@ if __name__ == "__main__":
 
     for dataset_name in ["ycbv"]:  # "lmo", "tudl",
         if dataset_name == "ycbv":
-            symmetry_obj_ids = [13, 18, 19, 20]
+            symmetry_obj_ids = [1, 13, 14, 16, 18, 19, 20, 21]
         elif dataset_name == "lmo":
-            symmetry_obj_ids = [11, 12]
+            symmetry_obj_ids = [10, 11]
+        elif dataset_name == "tless":
+            symmetry_obj_ids = list(range(1, 31))
         else:
             symmetry_obj_ids = []
         save_dir = results_dir / "comparison" / dataset_name
@@ -393,16 +401,19 @@ if __name__ == "__main__":
 
         mesh_vertices = {}
         ply_models = {}
-        cad_path = {}
+        cad_paths = {}
         for model_info in tqdm(model_infos):
             obj_id = int(model_info["obj_id"])
             obj_label = f"obj_{obj_id:06d}"
-            cad_eval_path = (
-                (cad_eval_dir / obj_label).with_suffix(".ply").as_posix()
-            )
-            cad_path[obj_label] = cad_eval_path
+            # cad_eval_path = (
+            #     (cad_eval_dir / obj_label).with_suffix(".ply").as_posix()
+            # )
+            # cad_paths[obj_label] = cad_eval_path
+            # ply_model = inout.load_ply(cad_eval_path)
+            cad_path = (cad_dir / obj_label).with_suffix(".ply").as_posix()
+            cad_paths[obj_label] = cad_path
+            ply_model = inout.load_ply(cad_path)
 
-            ply_model = inout.load_ply(cad_eval_path)
             ply_models[obj_id] = ply_model
             mesh_vertices[obj_id] = np.array(ply_model["pts"])
 
@@ -450,11 +461,11 @@ if __name__ == "__main__":
                     pred_object_datas[method] = []
                     pred_estimate = estimate[image_key]
                     pred_estimate = filter_estimates(gt, pred_estimate)  # keep top 1
-                    import ipdb; ipdb.set_trace()
+                    # import ipdb; ipdb.set_trace()
                     count[method] = len(pred_estimate) == len(gt)
                     for idx_obj in range(len(pred_estimate)):
-                        if str(pred_estimate[idx_obj]["obj_id"]) == "20":
-                            print(method, np.array(pred_estimate[idx_obj]["R"]).reshape(3, 3))
+                        # if str(pred_estimate[idx_obj]["obj_id"]) == "20":
+                        #     print(method, np.array(pred_estimate[idx_obj]["R"]).reshape(3, 3))
                         object_data = ObjectData(
                             label=str(pred_estimate[idx_obj]["obj_id"]),
                             TWO=Transform(
@@ -558,7 +569,6 @@ if __name__ == "__main__":
                             gt_pose=gt_obj_pose,
                             pred_pose=obj_pose,
                             symmetry_obj_ids=symmetry_obj_ids,
-                            max_distance=10,
                         )
 
                         ren_res_pred = ren.render_object(
